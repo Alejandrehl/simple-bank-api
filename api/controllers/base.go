@@ -5,10 +5,10 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/alejandrehl/simple-bank-api/api/models"
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
-
-	"github.com/alejandrehl/simple-bank-api/api/models"
+	_ "github.com/lib/pq"
 )
 
 type Server struct {
