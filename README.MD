@@ -11,3 +11,4 @@ Simple banking project. CRUD transaction between two users with different accoun
 ## Commands
 
 - Run script (project in this case): `go run main.go`. main.go can be whatever file you want.
+- Add module requirements and sums: `go mod tidy`.
