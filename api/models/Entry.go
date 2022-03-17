@@ -18,8 +18,8 @@ type Entry struct {
 
 func (e *Entry) Prepare() {
 	e.ID = 0
-	e.Owner = User{}
-	e.Balance = 0
+	e.Account = Account{}
+	e.Amount = 0
 	e.CreatedAt = time.Now()
 	e.UpdatedAt = time.Now()
 }
@@ -35,7 +35,7 @@ func (e *Entry) Save(db *gorm.DB) (*Entry, error) {
 		return &Entry{}, err
 	}
 	if e.ID != 0 {
-		err = db.Debug().Model(&User{}).Where("id = ?", e.OwnerID).Take(&e.Owner).Error
+		err = db.Debug().Model(&Account{}).Where("id = ?", e.AccountID).Take(&e.Account).Error
 		if err != nil {
 			return &Entry{}, err
 		}
@@ -45,20 +45,20 @@ func (e *Entry) Save(db *gorm.DB) (*Entry, error) {
 
 func (e *Entry) FindAll(db *gorm.DB) (*[]Entry, error) {
 	var err error
-	Entrys := []Entry{}
-	err = db.Debug().Model(&Entry{}).Limit(100).Find(&Entrys).Error
+	Entries := []Entry{}
+	err = db.Debug().Model(&Entry{}).Limit(100).Find(&Entries).Error
 	if err != nil {
 		return &[]Entry{}, err
 	}
-	if len(Entrys) > 0 {
-		for i := range Entrys {
-			err := db.Debug().Model(&User{}).Where("id = ?", Entrys[i].OwnerID).Take(&Entrys[i].Owner).Error
+	if len(Entries) > 0 {
+		for i := range Entries {
+			err := db.Debug().Model(&Account{}).Where("id = ?", Entries[i].AccountID).Take(&Entries[i].Account).Error
 			if err != nil {
 				return &[]Entry{}, err
 			}
 		}
 	}
-	return &Entrys, nil
+	return &Entries, nil
 }
 
 func (e *Entry) FindByID(db *gorm.DB, pid uint64) (*Entry, error) {
@@ -68,7 +68,7 @@ func (e *Entry) FindByID(db *gorm.DB, pid uint64) (*Entry, error) {
 		return &Entry{}, err
 	}
 	if e.ID != 0 {
-		err = db.Debug().Model(&User{}).Where("id = ?", e.OwnerID).Take(&e.Owner).Error
+		err = db.Debug().Model(&Account{}).Where("id = ?", e.AccountID).Take(&e.Account).Error
 		if err != nil {
 			return &Entry{}, err
 		}
@@ -80,12 +80,12 @@ func (e *Entry) Update(db *gorm.DB) (*Entry, error) {
 
 	var err error
 
-	err = db.Debug().Model(&Entry{}).Where("id = ?", e.ID).Updates(Entry{Balance: e.Balance, UpdatedAt: time.Now()}).Error
+	err = db.Debug().Model(&Entry{}).Where("id = ?", e.ID).Updates(Entry{Amount: e.Amount, UpdatedAt: time.Now()}).Error
 	if err != nil {
 		return &Entry{}, err
 	}
 	if e.ID != 0 {
-		err = db.Debug().Model(&User{}).Where("id = ?", e.OwnerID).Take(&e.Owner).Error
+		err = db.Debug().Model(&Account{}).Where("id = ?", e.AccountID).Take(&e.Account).Error
 		if err != nil {
 			return &Entry{}, err
 		}
@@ -93,9 +93,9 @@ func (e *Entry) Update(db *gorm.DB) (*Entry, error) {
 	return e, nil
 }
 
-func (e *Entry) Delete(db *gorm.DB, aid uint64, uid uint32) (int64, error) {
+func (e *Entry) Delete(db *gorm.DB, eid uint64, aid uint32) (int64, error) {
 
-	db = db.Debug().Model(&Entry{}).Where("id = ? and owner_id = ?", aid, uid).Take(&Entry{}).Delete(&Entry{})
+	db = db.Debug().Model(&Entry{}).Where("id = ? and account_id = ?", eid, aid).Take(&Entry{}).Delete(&Entry{})
 
 	if db.Error != nil {
 		if gorm.IsRecordNotFoundError(db.Error) {
