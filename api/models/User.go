@@ -52,64 +52,62 @@ func (u *User) Validate(action string) error {
 	switch strings.ToLower(action) {
 	case "update":
 		if u.Nickname == "" {
-			return errors.New("Required Nickname")
+			return errors.New("required nickname")
 		}
 		if u.Name == "" {
-			return errors.New("Required Name")
+			return errors.New("required name")
 		}
 		if u.LastName == "" {
-			return errors.New("Required LastName")
+			return errors.New("required lastName")
 		}
 		if u.Password == "" {
-			return errors.New("Required Password")
+			return errors.New("required password")
 		}
 		if u.Email == "" {
-			return errors.New("Required Email")
+			return errors.New("required email")
 		}
 		if err := checkmail.ValidateFormat(u.Email); err != nil {
-			return errors.New("Invalid Email")
+			return errors.New("invalid email")
 		}
 
 		return nil
 	case "login":
 		if u.Password == "" {
-			return errors.New("Required Password")
+			return errors.New("required password")
 		}
 		if u.Email == "" {
-			return errors.New("Required Email")
+			return errors.New("required email")
 		}
 		if err := checkmail.ValidateFormat(u.Email); err != nil {
-			return errors.New("Invalid Email")
+			return errors.New("invalid email")
 		}
 		return nil
 
 	default:
 		if u.Nickname == "" {
-			return errors.New("Required Nickname")
+			return errors.New("required nickname")
 		}
 		if u.Name == "" {
-			return errors.New("Required Name")
+			return errors.New("required name")
 		}
 		if u.LastName == "" {
-			return errors.New("Required LastName")
+			return errors.New("required lastName")
 		}
 		if u.Password == "" {
-			return errors.New("Required Password")
+			return errors.New("required password")
 		}
 		if u.Email == "" {
-			return errors.New("Required Email")
+			return errors.New("required email")
 		}
 		if err := checkmail.ValidateFormat(u.Email); err != nil {
-			return errors.New("Invalid Email")
+			return errors.New("invalid email")
 		}
 		return nil
 	}
 }
 
 func (u *User) SaveUser(db *gorm.DB) (*User, error) {
-
-	var err error
-	err = db.Debug().Create(&u).Error
+	var err = db.Debug().Create(&u).Error
 	if err != nil {
 		return &User{}, err
 	}
@@ -127,8 +125,7 @@ func (u *User) FindAllUsers(db *gorm.DB) (*[]User, error) {
 }
 
 func (u *User) FindUserByID(db *gorm.DB, uid uint32) (*User, error) {
-	var err error
-	err = db.Debug().Model(User{}).Where("id = ?", uid).Take(&u).Error
+	var err = db.Debug().Model(User{}).Where("id = ?", uid).Take(&u).Error
 	if err != nil {
 		return &User{}, err
 	}
@@ -139,7 +136,6 @@ func (u *User) FindUserByID(db *gorm.DB, uid uint32) (*User, error) {
 }
 
 func (u *User) UpdateAUser(db *gorm.DB, uid uint32) (*User, error) {
-
 	// To hash the password
 	err := u.BeforeSave()
 	if err != nil {
