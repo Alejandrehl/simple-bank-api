@@ -1,13 +1,7 @@
 package main
 
-import (
-	"fmt"
-	"time"
-)
+import "github.com/alejandrehl/simple-bank-api/api"
 
 func main() {
-    t := time.Now()
-    fmt.Println(t.Month())
-    fmt.Println(t.Day())
-    fmt.Println(t.Year())
+    api.Run()
 }

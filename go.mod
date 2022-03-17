@@ -10,4 +10,7 @@ require (
 	golang.org/x/crypto v0.0.0-20220315160706-3147a52a75dd
 )
 
-require github.com/jinzhu/inflection v1.0.0 // indirect
+require (
+	github.com/jinzhu/inflection v1.0.0 // indirect
+	github.com/joho/godotenv v1.4.0
+)
