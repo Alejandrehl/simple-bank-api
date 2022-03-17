@@ -12,3 +12,11 @@ type Account struct {
 	CreatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
 	UpdatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
 }
+
+func (a *Account) Prepare() {
+	a.ID = 0
+	a.Owner = User{}
+	a.Balance = 0
+	a.CreatedAt = time.Now()
+	a.UpdatedAt = time.Now()
+}
