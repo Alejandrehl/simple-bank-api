@@ -45,20 +45,20 @@ func (e *Entry) Save(db *gorm.DB) (*Entry, error) {
 
 func (e *Entry) FindAll(db *gorm.DB) (*[]Entry, error) {
 	var err error
-	Entries := []Entry{}
-	err = db.Debug().Model(&Entry{}).Limit(100).Find(&Entries).Error
+	entries := []Entry{}
+	err = db.Debug().Model(&Entry{}).Limit(100).Find(&entries).Error
 	if err != nil {
 		return &[]Entry{}, err
 	}
-	if len(Entries) > 0 {
-		for i := range Entries {
-			err := db.Debug().Model(&Account{}).Where("id = ?", Entries[i].AccountID).Take(&Entries[i].Account).Error
+	if len(entries) > 0 {
+		for i := range entries {
+			err := db.Debug().Model(&Account{}).Where("id = ?", entries[i].AccountID).Take(&entries[i].Account).Error
 			if err != nil {
 				return &[]Entry{}, err
 			}
 		}
 	}
-	return &Entries, nil
+	return &entries, nil
 }
 
 func (e *Entry) FindByID(db *gorm.DB, pid uint64) (*Entry, error) {
