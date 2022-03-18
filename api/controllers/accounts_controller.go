@@ -91,12 +91,12 @@ func (server *Server) GetAccountById(w http.ResponseWriter, r *http.Request) {
 
 	account := models.Account{}
 
-	itemReceived, err := account.FindByID(server.DB, aid, uid)
+	accountReceived, err := account.FindByID(server.DB, aid, uid)
 	if err != nil {
 		responses.ERROR(w, http.StatusInternalServerError, err)
 		return
 	}
-	responses.JSON(w, http.StatusOK, itemReceived)
+	responses.JSON(w, http.StatusOK, accountReceived)
 }
 
 func (server *Server) UpdateAccount(w http.ResponseWriter, r *http.Request) {
@@ -144,7 +144,6 @@ func (server *Server) UpdateAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	accountUpdate.Prepare()
 	err = accountUpdate.Validate()
 	if err != nil {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
