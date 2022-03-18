@@ -2,6 +2,7 @@ package models
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/jinzhu/gorm"
@@ -61,6 +62,7 @@ func (t *Transfer) Save(db *gorm.DB) (*Transfer, error) {
 
 func (t *Transfer) FindAll(db *gorm.DB) (*[]Transfer, error) {
 	var err error
+
 	transfers := []Transfer{}
 	err = db.Debug().Model(&Transfer{}).Limit(100).Find(&transfers).Error
 	if err != nil {
@@ -68,12 +70,23 @@ func (t *Transfer) FindAll(db *gorm.DB) (*[]Transfer, error) {
 	}
 	if len(transfers) > 0 {
 		for i := range transfers {
-			err := db.Debug().Model(&Account{}).Where("id = ?", transfers[i].FromAccountID).Take(&transfers[i].FromAccount).Error
+			fmt.Println("From Account ID")
+			fmt.Println(transfers[i].FromAccountID)
+			fmt.Println("To Account ID")
+			fmt.Println(transfers[i].ToAccountID)
+
+			err = db.Debug().Model(&Account{}).Where("id = ?", transfers[i].FromAccountID).Take(&transfers[i].FromAccount).Error
+			if err != nil {
+				return &[]Transfer{}, err
+			}
+
+			err = db.Debug().Model(&Account{}).Where("id = ?", transfers[i].ToAccountID).Take(&transfers[i].ToAccount).Error
 			if err != nil {
 				return &[]Transfer{}, err
 			}
 		}
 	}
+
 	return &transfers, nil
 }
 
