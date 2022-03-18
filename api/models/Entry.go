@@ -44,7 +44,7 @@ func (e *Entry) Save(db *gorm.DB) (*Entry, error) {
 	return e, nil
 }
 
-func (e *Entry) FindAll(db *gorm.DB) (*[]Entry, error) {
+func (e *Entry) FindAll(db *gorm.DB, uid uint32) (*[]Entry, error) {
 	var err error
 
 	entries := []Entry{}
