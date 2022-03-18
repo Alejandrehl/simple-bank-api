@@ -75,7 +75,7 @@ func (server *Server) GetAllAccounts(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusOK, accounts)
 }
 
-func (server *Server) GetById(w http.ResponseWriter, r *http.Request) {
+func (server *Server) GetAccountById(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	aid, err := strconv.ParseUint(vars["id"], 10, 64)
 	if err != nil {
