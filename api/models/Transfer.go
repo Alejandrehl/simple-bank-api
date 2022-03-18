@@ -2,6 +2,7 @@ package models
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/jinzhu/gorm"
@@ -77,11 +78,12 @@ func (t *Transfer) FindAll(db *gorm.DB) (*[]Transfer, error) {
 	return &transfers, nil
 }
 
-func (t *Transfer) FindAllByFromAccountID(db *gorm.DB, uid uint32) (*[]Transfer, error) {
+func (t *Transfer) FindByOwnerId(db *gorm.DB, uid uint32) (*[]Transfer, error) {
 	var err error
+	fmt.Println(uid)
 
 	transfers := []Transfer{}
-	err = db.Debug().Model(&Transfer{}).Limit(100).Where("from_account_id = ?", uid).Find(&transfers).Error
+	err = db.Debug().Model(&Transfer{}).Limit(100).Joins("FromAccount", db.Where(&Account{OwnerID: uid})).Find(&transfers).Error
 	if err != nil {
 		return &[]Transfer{}, err
 	}

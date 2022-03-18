@@ -58,8 +58,6 @@ func (server *Server) CreateTransfer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	
-	fmt.Println(transfer)
 	transferCreated, err := transfer.Save(server.DB)
 	if err != nil {
 		formattedError := formaterror.FormatError(err.Error())
@@ -80,7 +78,7 @@ func (server *Server) GetAllTransfers(w http.ResponseWriter, r *http.Request) {
 
 	transfer := models.Transfer{}
 
-	transfers, err := transfer.FindAllByFromAccountID(server.DB, uid)
+	transfers, err := transfer.FindByOwnerId(server.DB, uid)
 	if err != nil {
 		responses.ERROR(w, http.StatusInternalServerError, err)
 		return
