@@ -15,4 +15,11 @@ func (s *Server) initializeRoutes() {
 	s.Router.HandleFunc("/users/{id}", middlewares.SetMiddlewareJSON(s.GetUser)).Methods("GET")
 	s.Router.HandleFunc("/users/{id}", middlewares.SetMiddlewareJSON(middlewares.SetMiddlewareAuthentication(s.UpdateUser))).Methods("PUT")
 	s.Router.HandleFunc("/users/{id}", middlewares.SetMiddlewareAuthentication(s.DeleteUser)).Methods("DELETE")
+
+	//Accounts routes
+	s.Router.HandleFunc("/accounts", middlewares.SetMiddlewareJSON(s.Create)).Methods("POST")
+	s.Router.HandleFunc("/accounts", middlewares.SetMiddlewareJSON(s.GetAll)).Methods("GET")
+	s.Router.HandleFunc("/accounts/{id}", middlewares.SetMiddlewareJSON(s.GetById)).Methods("GET")
+	s.Router.HandleFunc("/accounts/{id}", middlewares.SetMiddlewareJSON(middlewares.SetMiddlewareAuthentication(s.Update))).Methods("PUT")
+	s.Router.HandleFunc("/accounts/{id}", middlewares.SetMiddlewareAuthentication(s.Delete)).Methods("DELETE")
 }
