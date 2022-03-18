@@ -2,6 +2,7 @@ package models
 
 import (
 	"errors"
+	"fmt"
 	"html"
 	"log"
 	"strings"
@@ -49,6 +50,8 @@ func (u *User) Prepare() {
 }
 
 func (u *User) Validate(action string) error {
+	fmt.Println(u)
+	
 	switch strings.ToLower(action) {
 	case "update":
 		if u.Nickname == "" {
