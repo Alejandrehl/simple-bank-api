@@ -9,6 +9,8 @@ import (
 
 type Account struct {
 	ID        uint32    `gorm:"primary_key;auto_increment" json:"id"`
+	Name  string    `gorm:"size:255;not null;" json:"name"`
+	Description  string    `gorm:"size:255;" json:"description"`
 	Owner    User      `json:"owner"`
 	OwnerID  uint32    `gorm:"not null" json:"owner_id"`
 	Balance  uint32    `gorm:"default:0;" json:"balance"`
@@ -18,6 +20,8 @@ type Account struct {
 
 func (a *Account) Prepare() {
 	a.ID = 0
+	a.Name = ""
+	a.Description = ""
 	a.Owner = User{}
 	a.Balance = 0
 	a.CreatedAt = time.Now()
@@ -25,6 +29,10 @@ func (a *Account) Prepare() {
 }
 
 func (a *Account) Validate() error {
+	if a.Name == "" {
+		return errors.New("name is required")
+	}
+
 	return nil
 }
 
