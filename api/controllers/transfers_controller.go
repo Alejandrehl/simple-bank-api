@@ -29,7 +29,6 @@ func (server *Server) CreateTransfer(w http.ResponseWriter, r *http.Request) {
 	}
 
 	transfer := models.Transfer{}
-
 	err = json.Unmarshal(body, &transfer)
 	if err != nil {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
@@ -42,8 +41,22 @@ func (server *Server) CreateTransfer(w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
-	
-	fmt.Println(transfer)
+
+	account := models.Account{}
+	fromAccount, errFromAccount := account.FindByID(server.DB, uint64(transfer.FromAccountID))
+	if errFromAccount != nil {
+		responses.ERROR(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	toAccount, errToAccount := account.FindByID(server.DB, uint64(transfer.ToAccountID))
+	if errToAccount != nil {
+		responses.ERROR(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	transfer.FromAccountID = fromAccount.ID
+	transfer.ToAccountID = toAccount.ID
 	transferCreated, err := transfer.Save(server.DB)
 	if err != nil {
 		formattedError := formaterror.FormatError(err.Error())
