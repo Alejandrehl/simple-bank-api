@@ -16,8 +16,13 @@ import (
 )
 
 func (server *Server) CreateTransfer(w http.ResponseWriter, r *http.Request) {
-	body, err := ioutil.ReadAll(r.Body)
+	_, err := auth.ExtractTokenID(r)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
+		return
+	}
 
+	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
@@ -26,27 +31,18 @@ func (server *Server) CreateTransfer(w http.ResponseWriter, r *http.Request) {
 	transfer := models.Transfer{}
 
 	err = json.Unmarshal(body, &transfer)
-
 	if err != nil {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 
 	transfer.Prepare()
-
 	err = transfer.Validate()
 	if err != nil {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
-
-	uid, err := auth.ExtractTokenID(r)
-	if err != nil {
-		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
-		return
-	}
-
-	transfer.FromAccountID = uid;
+	
 	transferCreated, err := transfer.Save(server.DB)
 	if err != nil {
 		formattedError := formaterror.FormatError(err.Error())

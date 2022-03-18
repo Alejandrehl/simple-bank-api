@@ -32,6 +32,10 @@ func (t *Transfer) Validate() error {
 		return errors.New("amount must be greater than zero")
 	}
 
+	if (t.FromAccountID == 0) {
+		return errors.New("destiny account is invalid")
+	}
+
 	if (t.ToAccountID == 0) {
 		return errors.New("destiny account is invalid")
 	}

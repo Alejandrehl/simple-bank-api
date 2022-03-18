@@ -22,4 +22,9 @@ func (s *Server) initializeRoutes() {
 	s.Router.HandleFunc("/accounts/{id}", middlewares.SetMiddlewareJSON(s.GetAccountById)).Methods("GET")
 	s.Router.HandleFunc("/accounts/{id}", middlewares.SetMiddlewareJSON(middlewares.SetMiddlewareAuthentication(s.UpdateAccount))).Methods("PUT")
 	s.Router.HandleFunc("/accounts/{id}", middlewares.SetMiddlewareAuthentication(s.DeleteAccount)).Methods("DELETE")
+
+	//Transfers routes
+	s.Router.HandleFunc("/transfers", middlewares.SetMiddlewareJSON(s.CreateTransfer)).Methods("POST")
+	s.Router.HandleFunc("/transfers", middlewares.SetMiddlewareJSON(s.GetAllTransfers)).Methods("GET")
+	s.Router.HandleFunc("/transfers/{id}", middlewares.SetMiddlewareJSON(s.GetTransferById)).Methods("GET")
 }
