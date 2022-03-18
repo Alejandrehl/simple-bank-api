@@ -58,7 +58,6 @@ func (server *Server) CreateAccount(w http.ResponseWriter, r *http.Request) {
 }
 
 func (server *Server) GetAllAccounts(w http.ResponseWriter, r *http.Request) {
-	// Is this user authenticated?
 	uid, err := auth.ExtractTokenID(r)
 	if err != nil {
 		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
@@ -78,15 +77,21 @@ func (server *Server) GetAllAccounts(w http.ResponseWriter, r *http.Request) {
 
 func (server *Server) GetById(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	rid, err := strconv.ParseUint(vars["id"], 10, 64)
-
+	aid, err := strconv.ParseUint(vars["id"], 10, 64)
 	if err != nil {
 		responses.ERROR(w, http.StatusBadRequest, err)
 		return
 	}
-	item := models.Account{}
 
-	itemReceived, err := item.FindByID(server.DB, rid)
+	uid, err := auth.ExtractTokenID(r)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
+		return
+	}
+
+	account := models.Account{}
+
+	itemReceived, err := account.FindByID(server.DB, aid, uid)
 	if err != nil {
 		responses.ERROR(w, http.StatusInternalServerError, err)
 		return
