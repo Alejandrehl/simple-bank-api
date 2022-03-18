@@ -57,10 +57,17 @@ func (server *Server) CreateAccount(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusCreated, itemCreated)
 }
 
-func (server *Server) GetAll(w http.ResponseWriter, r *http.Request) {
+func (server *Server) GetAllAccounts(w http.ResponseWriter, r *http.Request) {
+	// Is this user authenticated?
+	uid, err := auth.ExtractTokenID(r)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
+		return
+	}
+
 	account := models.Account{}
 
-	accounts, err := account.FindAll(server.DB)
+	accounts, err := account.FindAll(server.DB, uid)
 	if err != nil {
 		responses.ERROR(w, http.StatusInternalServerError, err)
 		return

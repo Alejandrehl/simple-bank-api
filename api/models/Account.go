@@ -50,13 +50,14 @@ func (a *Account) Save(db *gorm.DB) (*Account, error) {
 	return a, nil
 }
 
-func (a *Account) FindAll(db *gorm.DB) (*[]Account, error) {
+func (a *Account) FindAll(db *gorm.DB, uid uint32) (*[]Account, error) {
 	var err error
 	accounts := []Account{}
-	err = db.Debug().Model(&Account{}).Limit(100).Find(&accounts).Error
+	err = db.Debug().Model(&Account{}).Limit(100).Where("owner_id = ?", uid).Find(&accounts).Error
 	if err != nil {
 		return &[]Account{}, err
 	}
+
 	if len(accounts) > 0 {
 		for i := range accounts {
 			err := db.Debug().Model(&User{}).Where("id = ?", accounts[i].OwnerID).Take(&accounts[i].Owner).Error
