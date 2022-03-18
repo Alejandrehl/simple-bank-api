@@ -9,7 +9,7 @@ import (
 
 type Account struct {
 	ID        uint32    `gorm:"primary_key;auto_increment" json:"id"`
-	Name  string    `gorm:"size:255;not null;" json:"name"`
+	Name  string    `gorm:"size:255;not null;unique;" json:"name"`
 	Description  string    `gorm:"size:255;" json:"description"`
 	Owner    User      `json:"owner"`
 	OwnerID  uint32    `gorm:"not null" json:"owner_id"`
@@ -20,8 +20,6 @@ type Account struct {
 
 func (a *Account) Prepare() {
 	a.ID = 0
-	a.Name = ""
-	a.Description = ""
 	a.Owner = User{}
 	a.Balance = 0
 	a.CreatedAt = time.Now()
@@ -42,6 +40,7 @@ func (a *Account) Save(db *gorm.DB) (*Account, error) {
 	if err != nil {
 		return &Account{}, err
 	}
+
 	if a.ID != 0 {
 		err = db.Debug().Model(&User{}).Where("id = ?", a.OwnerID).Take(&a.Owner).Error
 		if err != nil {

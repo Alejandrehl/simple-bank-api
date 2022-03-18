@@ -15,7 +15,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func (server *Server) Create(w http.ResponseWriter, r *http.Request) {
+func (server *Server) CreateAccount(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 
 	if err != nil {
@@ -26,12 +26,14 @@ func (server *Server) Create(w http.ResponseWriter, r *http.Request) {
 	item := models.Account{}
 
 	err = json.Unmarshal(body, &item)
+
 	if err != nil {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 
 	item.Prepare()
+
 	err = item.Validate()
 	if err != nil {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
@@ -43,11 +45,8 @@ func (server *Server) Create(w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
 		return
 	}
-	if uid != item.OwnerID {
-		responses.ERROR(w, http.StatusUnauthorized, errors.New(http.StatusText(http.StatusUnauthorized)))
-		return
-	}
 
+	item.OwnerID = uid;
 	itemCreated, err := item.Save(server.DB)
 	if err != nil {
 		formattedError := formaterror.FormatError(err.Error())
