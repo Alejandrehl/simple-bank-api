@@ -85,10 +85,9 @@ func (a *Account) FindByID(db *gorm.DB, pid uint64, uid uint32) (*Account, error
 }
 
 func (a *Account) Update(db *gorm.DB) (*Account, error) {
-
 	var err error
 
-	err = db.Debug().Model(&Account{}).Where("id = ?", a.ID).Updates(Account{Balance: a.Balance, UpdatedAt: time.Now()}).Error
+	err = db.Debug().Model(&Account{}).Where("id = ?", a.ID).Updates(Account{Name: a.Name, Description: a.Description, OwnerID: a.OwnerID, UpdatedAt: time.Now()}).Error
 	if err != nil {
 		return &Account{}, err
 	}
