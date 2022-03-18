@@ -42,21 +42,24 @@ func (server *Server) CreateTransfer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	account := models.Account{}
-	fromAccount, errFromAccount := account.FindByID(server.DB, uint64(transfer.FromAccountID))
-	if errFromAccount != nil {
+	var account models.Account
+
+	account = models.Account{}
+	_, err = account.CheckAccountExist(server.DB, uint64(transfer.FromAccountID))
+	if err != nil {
 		responses.ERROR(w, http.StatusInternalServerError, err)
 		return
 	}
 
-	toAccount, errToAccount := account.FindByID(server.DB, uint64(transfer.ToAccountID))
-	if errToAccount != nil {
+	account = models.Account{}
+	_, err = account.CheckAccountExist(server.DB, uint64(transfer.ToAccountID))
+	if err != nil {
 		responses.ERROR(w, http.StatusInternalServerError, err)
 		return
 	}
 
-	transfer.FromAccountID = fromAccount.ID
-	transfer.ToAccountID = toAccount.ID
+	
+	fmt.Println(transfer)
 	transferCreated, err := transfer.Save(server.DB)
 	if err != nil {
 		formattedError := formaterror.FormatError(err.Error())

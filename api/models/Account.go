@@ -2,6 +2,7 @@ package models
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/jinzhu/gorm"
@@ -72,10 +73,10 @@ func (a *Account) FindAll(db *gorm.DB, uid uint32) (*[]Account, error) {
 	return &accounts, nil
 }
 
-func (a *Account) FindByID(db *gorm.DB, pid uint64) (*Account, error) {
+func (a *Account) FindByID(db *gorm.DB, aid uint64) (*Account, error) {
 	var err error
 
-	err = db.Debug().Model(&Account{}).Where("id = ?", pid).Take(&a).Error
+	err = db.Debug().Model(&Account{}).Where("id = ?", aid).Take(&a).Error
 	if err != nil {
 		return &Account{}, err
 	}
@@ -117,4 +118,15 @@ func (a *Account) Delete(db *gorm.DB, aid uint64, uid uint32) (int64, error) {
 	}
 
 	return db.RowsAffected, nil
+}
+
+func (a *Account) CheckAccountExist(db *gorm.DB, aid uint64) (*Account, error) {
+	fmt.Println(aid)
+	
+	var err = db.Debug().Model(&Account{}).Where("id = ?", aid).Take(&a).Error
+	if err != nil {
+		return &Account{}, err
+	}
+	
+	return a, nil
 }
