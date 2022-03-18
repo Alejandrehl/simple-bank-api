@@ -70,7 +70,7 @@ func (server *Server) CreateTransfer(w http.ResponseWriter, r *http.Request) {
 }
 
 func (server *Server) GetAllTransfers(w http.ResponseWriter, r *http.Request) {
-	uid, err := auth.ExtractTokenID(r)
+	_, err := auth.ExtractTokenID(r)
 	if err != nil {
 		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
 		return
@@ -78,7 +78,7 @@ func (server *Server) GetAllTransfers(w http.ResponseWriter, r *http.Request) {
 
 	transfer := models.Transfer{}
 
-	transfers, err := transfer.FindByOwnerId(server.DB, uid)
+	transfers, err := transfer.FindAll(server.DB)
 	if err != nil {
 		responses.ERROR(w, http.StatusInternalServerError, err)
 		return
