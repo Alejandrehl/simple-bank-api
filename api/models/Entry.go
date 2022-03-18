@@ -48,7 +48,7 @@ func (e *Entry) FindAll(db *gorm.DB, uid uint32) (*[]Entry, error) {
 	var err error
 
 	entries := []Entry{}
-	err = db.Debug().Model(&Entry{}).Limit(100).Find(&entries).Error
+	err = db.Debug().Model(&Entry{}).Limit(100).Joins("Account", db.Where(&Account{OwnerID: uid})).Find(&entries).Error
 	if err != nil {
 		return &[]Entry{}, err
 	}
@@ -67,7 +67,6 @@ func (e *Entry) FindAll(db *gorm.DB, uid uint32) (*[]Entry, error) {
 func (e *Entry) FindByID(db *gorm.DB, eid uint64, uid uint32) (*Entry, error) {
 	var err error
 
-	// err = db.Debug().Model(&Entry{}).Where("id = ?", eid).Take(&e).Error
 	err = db.Debug().Model(&Entry{}).Joins("Account", db.Where(&Account{OwnerID: uid})).Where("id = ?", eid).Take(&e).Error
 	if err != nil {
 		return &Entry{}, err
