@@ -102,71 +102,64 @@ func (server *Server) GetAccountById(w http.ResponseWriter, r *http.Request) {
 func (server *Server) UpdateAccount(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
-	// Check if the item id is valid
-	rid, err := strconv.ParseUint(vars["id"], 10, 64)
+	aid, err := strconv.ParseUint(vars["id"], 10, 64)
 	if err != nil {
 		responses.ERROR(w, http.StatusBadRequest, err)
 		return
 	}
 
-	//CHeck if the auth token is valid and  get the user id from it
 	uid, err := auth.ExtractTokenID(r)
 	if err != nil {
 		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
 		return
 	}
 
-	// Check if the item exist
-	item := models.Account{}
-	err = server.DB.Debug().Model(models.Account{}).Where("id = ?", rid).Take(&item).Error
+	account := models.Account{}
+	err = server.DB.Debug().Model(models.Account{}).Where("id = ?", aid).Take(&account).Error
 	if err != nil {
 		responses.ERROR(w, http.StatusNotFound, errors.New("account not found"))
 		return
 	}
 
-	// If a user attempt to update a item not belonging to him
-	if uid != item.OwnerID {
+	if uid != account.OwnerID {
 		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
 		return
 	}
-	// Read the data posted
+
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 
-	// Start processing the request data
-	itemUpdate := models.Account{}
-	err = json.Unmarshal(body, &itemUpdate)
+	accountUpdate := models.Account{}
+	err = json.Unmarshal(body, &accountUpdate)
 	if err != nil {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 
-	//Also check if the request user id is equal to the one gotten from token
-	if uid != itemUpdate.OwnerID {
+	if uid != accountUpdate.OwnerID {
 		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
 		return
 	}
 
-	itemUpdate.Prepare()
-	err = itemUpdate.Validate()
+	accountUpdate.Prepare()
+	err = accountUpdate.Validate()
 	if err != nil {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 
-	itemUpdate.ID = item.ID //this is important to tell the model the item id to update, the other update field are set above
+	accountUpdate.ID = account.ID //this is important to tell the model the item id to update, the other update field are set above
 
-	itemUpdated, err := itemUpdate.Update(server.DB)
-
+	accountUpdated, err := accountUpdate.Update(server.DB)
 	if err != nil {
 		formattedError := formaterror.FormatError(err.Error())
 		responses.ERROR(w, http.StatusInternalServerError, formattedError)
 		return
 	}
-	responses.JSON(w, http.StatusOK, itemUpdated)
+	responses.JSON(w, http.StatusOK, accountUpdated)
 }
 
 func (server *Server) DeleteAccount(w http.ResponseWriter, r *http.Request) {
