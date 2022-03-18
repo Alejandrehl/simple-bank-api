@@ -99,7 +99,7 @@ func (server *Server) GetAccountById(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusOK, itemReceived)
 }
 
-func (server *Server) Update(w http.ResponseWriter, r *http.Request) {
+func (server *Server) UpdateAccount(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
 	// Check if the item id is valid
@@ -169,7 +169,7 @@ func (server *Server) Update(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusOK, itemUpdated)
 }
 
-func (server *Server) Delete(w http.ResponseWriter, r *http.Request) {
+func (server *Server) DeleteAccount(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
 	// Is a valid item id given to us?
