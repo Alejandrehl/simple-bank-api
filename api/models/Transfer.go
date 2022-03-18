@@ -2,7 +2,6 @@ package models
 
 import (
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/jinzhu/gorm"
@@ -70,11 +69,6 @@ func (t *Transfer) FindAll(db *gorm.DB) (*[]Transfer, error) {
 	}
 	if len(transfers) > 0 {
 		for i := range transfers {
-			fmt.Println("From Account ID")
-			fmt.Println(transfers[i].FromAccountID)
-			fmt.Println("To Account ID")
-			fmt.Println(transfers[i].ToAccountID)
-
 			err = db.Debug().Model(&Account{}).Where("id = ?", transfers[i].FromAccountID).Take(&transfers[i].FromAccount).Error
 			if err != nil {
 				return &[]Transfer{}, err
