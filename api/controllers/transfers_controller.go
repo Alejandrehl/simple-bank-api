@@ -43,6 +43,7 @@ func (server *Server) CreateTransfer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
+	fmt.Println(transfer)
 	transferCreated, err := transfer.Save(server.DB)
 	if err != nil {
 		formattedError := formaterror.FormatError(err.Error())

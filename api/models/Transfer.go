@@ -2,6 +2,7 @@ package models
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/jinzhu/gorm"
@@ -22,12 +23,13 @@ func (t *Transfer) Prepare() {
 	t.ID = 0
 	t.FromAccount = Account{}
 	t.ToAccount = Account{}
-	t.Amount = 0
 	t.CreatedAt = time.Now()
 	t.UpdatedAt = time.Now()
 }
 
 func (t *Transfer) Validate() error {
+	fmt.Println(t)
+
 	if t.Amount <= 0 {
 		return errors.New("amount must be greater than zero")
 	}
