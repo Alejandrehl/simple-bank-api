@@ -91,11 +91,17 @@ func (server *Server) GetAccountById(w http.ResponseWriter, r *http.Request) {
 
 	account := models.Account{}
 
-	accountReceived, err := account.FindByID(server.DB, aid, uid)
+	accountReceived, err := account.FindByID(server.DB, aid)
 	if err != nil {
 		responses.ERROR(w, http.StatusInternalServerError, err)
 		return
 	}
+
+	if (accountReceived.OwnerID != uid) {
+		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
+		return
+	}
+
 	responses.JSON(w, http.StatusOK, accountReceived)
 }
 

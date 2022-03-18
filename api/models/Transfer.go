@@ -28,11 +28,20 @@ func (t *Transfer) Prepare() {
 }
 
 func (t *Transfer) Validate() error {
+	if t.Amount <= 0 {
+		return errors.New("amount must be greater than zero")
+	}
+
+	if (t.ToAccountID == 0) {
+		return errors.New("destiny account is invalid")
+	}
+
 	return nil
 }
 
 func (t *Transfer) Save(db *gorm.DB) (*Transfer, error) {
 	var err error
+
 	err = db.Debug().Model(&Transfer{}).Create(&t).Error
 	if err != nil {
 		return &Transfer{}, err
@@ -43,6 +52,7 @@ func (t *Transfer) Save(db *gorm.DB) (*Transfer, error) {
 			return &Transfer{}, err
 		}
 	}
+
 	return t, nil
 }
 
@@ -61,6 +71,26 @@ func (t *Transfer) FindAll(db *gorm.DB) (*[]Transfer, error) {
 			}
 		}
 	}
+	return &transfers, nil
+}
+
+func (t *Transfer) FindAllByFromAccountID(db *gorm.DB, uid uint32) (*[]Transfer, error) {
+	var err error
+
+	transfers := []Transfer{}
+	err = db.Debug().Model(&Transfer{}).Limit(100).Where("from_account_id = ?", uid).Find(&transfers).Error
+	if err != nil {
+		return &[]Transfer{}, err
+	}
+	if len(transfers) > 0 {
+		for i := range transfers {
+			err := db.Debug().Model(&Account{}).Where("id = ?", transfers[i].FromAccountID).Take(&transfers[i].FromAccount).Error
+			if err != nil {
+				return &[]Transfer{}, err
+			}
+		}
+	}
+
 	return &transfers, nil
 }
 

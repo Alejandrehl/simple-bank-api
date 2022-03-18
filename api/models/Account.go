@@ -72,10 +72,10 @@ func (a *Account) FindAll(db *gorm.DB, uid uint32) (*[]Account, error) {
 	return &accounts, nil
 }
 
-func (a *Account) FindByID(db *gorm.DB, pid uint64, uid uint32) (*Account, error) {
+func (a *Account) FindByID(db *gorm.DB, pid uint64) (*Account, error) {
 	var err error
 
-	err = db.Debug().Model(&Account{}).Where("id = ? and owner_id = ?", pid, uid).Take(&a).Error
+	err = db.Debug().Model(&Account{}).Where("id = ?", pid).Take(&a).Error
 	if err != nil {
 		return &Account{}, err
 	}
