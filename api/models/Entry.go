@@ -11,7 +11,7 @@ type Entry struct {
 	ID        uint32    `gorm:"primary_key;auto_increment" json:"id"`
 	Account    Account      `json:"account"`
 	AccountID  uint32    `gorm:"not null;" json:"account_id"`
-	Amount  uint32    `gorm:"not null;" json:"amount"`
+	Amount  uint32    `gorm:"default:0;not null;" json:"amount"`
 	CreatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
 	UpdatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
 }
@@ -19,7 +19,6 @@ type Entry struct {
 func (e *Entry) Prepare() {
 	e.ID = 0
 	e.Account = Account{}
-	e.Amount = 0
 	e.CreatedAt = time.Now()
 	e.UpdatedAt = time.Now()
 }
@@ -30,6 +29,7 @@ func (e *Entry) Validate() error {
 
 func (e *Entry) Save(db *gorm.DB) (*Entry, error) {
 	var err error
+
 	err = db.Debug().Model(&Entry{}).Create(&e).Error
 	if err != nil {
 		return &Entry{}, err
@@ -40,11 +40,13 @@ func (e *Entry) Save(db *gorm.DB) (*Entry, error) {
 			return &Entry{}, err
 		}
 	}
+
 	return e, nil
 }
 
 func (e *Entry) FindAll(db *gorm.DB) (*[]Entry, error) {
 	var err error
+
 	entries := []Entry{}
 	err = db.Debug().Model(&Entry{}).Limit(100).Find(&entries).Error
 	if err != nil {
@@ -58,12 +60,14 @@ func (e *Entry) FindAll(db *gorm.DB) (*[]Entry, error) {
 			}
 		}
 	}
+
 	return &entries, nil
 }
 
-func (e *Entry) FindByID(db *gorm.DB, pid uint64) (*Entry, error) {
+func (e *Entry) FindByID(db *gorm.DB, eid uint64) (*Entry, error) {
 	var err error
-	err = db.Debug().Model(&Entry{}).Where("id = ?", pid).Take(&e).Error
+
+	err = db.Debug().Model(&Entry{}).Where("id = ?", eid).Take(&e).Error
 	if err != nil {
 		return &Entry{}, err
 	}
@@ -73,11 +77,11 @@ func (e *Entry) FindByID(db *gorm.DB, pid uint64) (*Entry, error) {
 			return &Entry{}, err
 		}
 	}
+
 	return e, nil
 }
 
 func (e *Entry) Update(db *gorm.DB) (*Entry, error) {
-
 	var err error
 
 	err = db.Debug().Model(&Entry{}).Where("id = ?", e.ID).Updates(Entry{Amount: e.Amount, UpdatedAt: time.Now()}).Error
@@ -90,11 +94,11 @@ func (e *Entry) Update(db *gorm.DB) (*Entry, error) {
 			return &Entry{}, err
 		}
 	}
+
 	return e, nil
 }
 
 func (e *Entry) Delete(db *gorm.DB, eid uint64, aid uint32) (int64, error) {
-
 	db = db.Debug().Model(&Entry{}).Where("id = ? and account_id = ?", eid, aid).Take(&Entry{}).Delete(&Entry{})
 
 	if db.Error != nil {
@@ -103,5 +107,6 @@ func (e *Entry) Delete(db *gorm.DB, eid uint64, aid uint32) (int64, error) {
 		}
 		return 0, db.Error
 	}
+
 	return db.RowsAffected, nil
 }
