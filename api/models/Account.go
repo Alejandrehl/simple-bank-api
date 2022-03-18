@@ -36,22 +36,24 @@ func (a *Account) Validate() error {
 
 func (a *Account) Save(db *gorm.DB) (*Account, error) {
 	var err error
+	
 	err = db.Debug().Model(&Account{}).Create(&a).Error
 	if err != nil {
 		return &Account{}, err
 	}
-
 	if a.ID != 0 {
 		err = db.Debug().Model(&User{}).Where("id = ?", a.OwnerID).Take(&a.Owner).Error
 		if err != nil {
 			return &Account{}, err
 		}
 	}
+
 	return a, nil
 }
 
 func (a *Account) FindAll(db *gorm.DB, uid uint32) (*[]Account, error) {
 	var err error
+
 	accounts := []Account{}
 	err = db.Debug().Model(&Account{}).Limit(100).Where("owner_id = ?", uid).Find(&accounts).Error
 	if err != nil {
@@ -66,11 +68,13 @@ func (a *Account) FindAll(db *gorm.DB, uid uint32) (*[]Account, error) {
 			}
 		}
 	}
+
 	return &accounts, nil
 }
 
 func (a *Account) FindByID(db *gorm.DB, pid uint64, uid uint32) (*Account, error) {
 	var err error
+
 	err = db.Debug().Model(&Account{}).Where("id = ? and owner_id = ?", pid, uid).Take(&a).Error
 	if err != nil {
 		return &Account{}, err
@@ -81,6 +85,7 @@ func (a *Account) FindByID(db *gorm.DB, pid uint64, uid uint32) (*Account, error
 			return &Account{}, err
 		}
 	}
+
 	return a, nil
 }
 
@@ -97,11 +102,11 @@ func (a *Account) Update(db *gorm.DB) (*Account, error) {
 			return &Account{}, err
 		}
 	}
+
 	return a, nil
 }
 
 func (a *Account) Delete(db *gorm.DB, aid uint64, uid uint32) (int64, error) {
-
 	db = db.Debug().Model(&Account{}).Where("id = ? and owner_id = ?", aid, uid).Take(&Account{}).Delete(&Account{})
 
 	if db.Error != nil {
@@ -110,5 +115,6 @@ func (a *Account) Delete(db *gorm.DB, aid uint64, uid uint32) (int64, error) {
 		}
 		return 0, db.Error
 	}
+
 	return db.RowsAffected, nil
 }
