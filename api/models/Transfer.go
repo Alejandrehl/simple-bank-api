@@ -19,6 +19,15 @@ type Transfer struct {
 	UpdatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
 }
 
+type TransferResult struct {
+	ID        uint32
+	FromAccountID  uint32  
+	ToAccountID  uint32 
+	Amount  uint32   
+	CreatedAt time.Time 
+}
+
+
 func (t *Transfer) Prepare() {
 	t.ID = 0
 	t.FromAccount = Account{}
@@ -113,26 +122,21 @@ func (t *Transfer) FindAll(db *gorm.DB) (*[]Transfer, error) {
 func (t *Transfer) FindByOwnerId(db *gorm.DB, uid uint32) (*[]Transfer, error) {
 	var err error
 	/*
+	Search all user transfers
 	SELECT * 
 	FROM transfers AS t
 	JOIN accounts AS faccount ON t.from_account_id=faccount.id
 	JOIN accounts AS taccount ON t.from_account_id=taccount.id
 	WHERE faccount.owner_id = uid AND taccount.owner_id = uid
 	*/
-	type Result struct {
-		ID   int
-		Amount string
-	  }
-	  
-	var result Result
+
+	var result []TransferResult
 	db.Raw(`
 	SELECT * 
 	FROM transfers AS t 
 	JOIN accounts AS faccount ON t.from_account_id=faccount.id
 	JOIN accounts AS taccount ON t.from_account_id=taccount.id
-	WHERE faccount.owner_id=? OR taccount.owner_id=?`, uid, uid).Scan(&result)
-
-	fmt.Println("AQUI8")
+	WHERE faccount.owner_id=? AND taccount.owner_id=?`, uid, uid).Scan(&result)
 	fmt.Println(result)
 
 	transfers := []Transfer{}
