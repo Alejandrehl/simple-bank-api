@@ -23,6 +23,8 @@ type User struct {
 	UpdatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
 }
 
+var selectUserFields = []string{"id", "nickname", "name", "last_name", "email", "created_at", "updated_at"}
+
 func Hash(password string) ([]byte, error) {
 	return bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 }
@@ -121,7 +123,7 @@ func (u *User) FindAllUsers(db *gorm.DB) (*[]User, error) {
 	var err error
 	users := []User{}
 	
-	err = db.Debug().Model(&User{}).Limit(100).Select([]string{"id", "nickname", "name", "last_name", "email", "created_at", "updated_at"}).Find(&users).Error
+	err = db.Debug().Model(&User{}).Limit(100).Select(selectUserFields).Find(&users).Error
 	if err != nil {
 		return &[]User{}, err
 	}
@@ -130,13 +132,14 @@ func (u *User) FindAllUsers(db *gorm.DB) (*[]User, error) {
 }
 
 func (u *User) FindUserByID(db *gorm.DB, uid uint32) (*User, error) {
-	var err = db.Debug().Model(User{}).Where("id = ?", uid).Take(&u).Error
+	var err = db.Debug().Model(User{}).Select(selectUserFields).Where("id = ?", uid).Take(&u).Error
 	if err != nil {
 		return &User{}, err
 	}
 	if gorm.IsRecordNotFoundError(err) {
 		return &User{}, errors.New("User Not Found")
 	}
+
 	return u, err
 }
 
@@ -170,7 +173,6 @@ func (u *User) UpdateAUser(db *gorm.DB, uid uint32) (*User, error) {
 }
 
 func (u *User) DeleteAUser(db *gorm.DB, uid uint32) (int64, error) {
-
 	db = db.Debug().Model(&User{}).Where("id = ?", uid).Take(&User{}).Delete(&User{})
 
 	if db.Error != nil {
