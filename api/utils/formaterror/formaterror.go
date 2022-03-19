@@ -2,13 +2,10 @@ package formaterror
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 )
 
-func FormatError(err string) error {
-	fmt.Println(err)
-	
+func FormatError(err string) error {	
 	if strings.Contains(err, "nickname") {
 		return errors.New("nickname already taken")
 	}

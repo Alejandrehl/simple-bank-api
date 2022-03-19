@@ -23,18 +23,16 @@ func (server *Server) CreateAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	item := models.Account{}
+	account := models.Account{}
 
-	err = json.Unmarshal(body, &item)
-
+	err = json.Unmarshal(body, &account)
 	if err != nil {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 
-	item.Prepare()
-
-	err = item.Validate()
+	account.Prepare()
+	err = account.Validate()
 	if err != nil {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
@@ -46,15 +44,16 @@ func (server *Server) CreateAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	item.OwnerID = uid;
-	itemCreated, err := item.Save(server.DB)
+	account.OwnerID = uid;
+	accountCreated, err := account.Save(server.DB)
 	if err != nil {
 		formattedError := formaterror.FormatError(err.Error())
 		responses.ERROR(w, http.StatusInternalServerError, formattedError)
 		return
 	}
-	w.Header().Set("Lacation", fmt.Sprintf("%s%s/%d", r.Host, r.URL.Path, itemCreated.ID))
-	responses.JSON(w, http.StatusCreated, itemCreated)
+
+	w.Header().Set("Lacation", fmt.Sprintf("%s%s/%d", r.Host, r.URL.Path, accountCreated.ID))
+	responses.JSON(w, http.StatusCreated, accountCreated)
 }
 
 func (server *Server) GetAllAccounts(w http.ResponseWriter, r *http.Request) {

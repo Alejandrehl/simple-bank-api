@@ -82,7 +82,6 @@ func (u *User) Validate(action string) error {
 			return errors.New("invalid email")
 		}
 		return nil
-
 	default:
 		if u.Nickname == "" {
 			return errors.New("required nickname")
@@ -102,6 +101,7 @@ func (u *User) Validate(action string) error {
 		if err := checkmail.ValidateFormat(u.Email); err != nil {
 			return errors.New("invalid email")
 		}
+
 		return nil
 	}
 }
@@ -111,6 +111,7 @@ func (u *User) SaveUser(db *gorm.DB) (*User, error) {
 	if err != nil {
 		return &User{}, err
 	}
+
 	return u, nil
 }
 
