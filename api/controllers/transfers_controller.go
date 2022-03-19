@@ -45,11 +45,15 @@ func (server *Server) CreateTransfer(w http.ResponseWriter, r *http.Request) {
 	var account models.Account
 
 	account = models.Account{}
-	_, err = account.CheckAccountExist(server.DB, uint64(transfer.FromAccountID))
+	from_account, err := account.CheckAccountExist(server.DB, uint64(transfer.FromAccountID))
 	if err != nil {
 		responses.ERROR(w, http.StatusInternalServerError, err)
 		return
 	}
+	// TODO: Verificar si el saldo(balance) de from_account es mayor que el monto a 
+	fmt.Println(from_account)
+	fmt.Println(from_account.ID)
+	fmt.Println(from_account.Balance)
 
 	account = models.Account{}
 	_, err = account.CheckAccountExist(server.DB, uint64(transfer.ToAccountID))
@@ -58,8 +62,12 @@ func (server *Server) CreateTransfer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// TODO: Descontar monto de transferencia de from_account y sumarla a to_account
+
 	transferCreated, err := transfer.Save(server.DB)
 	if err != nil {
+		// TODO: Devolver el dinero a from_account y descontarla de to_account
+	
 		formattedError := formaterror.FormatError(err.Error())
 		responses.ERROR(w, http.StatusInternalServerError, formattedError)
 		return

@@ -2,7 +2,6 @@ package models
 
 import (
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/jinzhu/gorm"
@@ -120,9 +119,7 @@ func (a *Account) Delete(db *gorm.DB, aid uint64, uid uint32) (int64, error) {
 	return db.RowsAffected, nil
 }
 
-func (a *Account) CheckAccountExist(db *gorm.DB, aid uint64) (*Account, error) {
-	fmt.Println(aid)
-	
+func (a *Account) CheckAccountExist(db *gorm.DB, aid uint64) (*Account, error) {	
 	var err = db.Debug().Model(&Account{}).Where("id = ?", aid).Take(&a).Error
 	if err != nil {
 		return &Account{}, err
