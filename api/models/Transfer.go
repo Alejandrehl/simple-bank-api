@@ -54,6 +54,21 @@ func (t *Transfer) Save(db *gorm.DB) (*Transfer, error) {
 		if err != nil {
 			return &Transfer{}, err
 		}
+
+		err = db.Debug().Model(&User{}).Where("id = ?", t.FromAccount.OwnerID).Take(&t.FromAccount.Owner).Error
+		if err != nil {
+			return &Transfer{}, err
+		}
+
+		err = db.Debug().Model(&Account{}).Where("id = ?", t.ToAccountID).Take(&t.ToAccount).Error
+		if err != nil {
+			return &Transfer{}, err
+		}
+
+		err = db.Debug().Model(&User{}).Where("id = ?", t.ToAccount.OwnerID).Take(&t.ToAccount.Owner).Error
+		if err != nil {
+			return &Transfer{}, err
+		}
 	}
 
 	return t, nil
