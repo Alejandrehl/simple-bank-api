@@ -140,6 +140,21 @@ func (t *Transfer) FindByID(db *gorm.DB, pid uint64) (*Transfer, error) {
 		if err != nil {
 			return &Transfer{}, err
 		}
+
+		err = db.Debug().Model(&User{}).Where("id = ?", t.FromAccount.OwnerID).Take(&t.FromAccount.Owner).Error
+		if err != nil {
+			return &Transfer{}, err
+		}
+
+		err = db.Debug().Model(&Account{}).Where("id = ?", t.ToAccountID).Take(&t.ToAccount).Error
+		if err != nil {
+			return &Transfer{}, err
+		}
+
+		err = db.Debug().Model(&User{}).Where("id = ?", t.ToAccount.OwnerID).Take(&t.ToAccount.Owner).Error
+		if err != nil {
+			return &Transfer{}, err
+		}
 	}
 	return t, nil
 }
@@ -157,6 +172,21 @@ func (t *Transfer) Update(db *gorm.DB) (*Transfer, error) {
 		if err != nil {
 			return &Transfer{}, err
 		}
+
+		err = db.Debug().Model(&User{}).Where("id = ?", t.FromAccount.OwnerID).Take(&t.FromAccount.Owner).Error
+		if err != nil {
+			return &Transfer{}, err
+		}
+
+		err = db.Debug().Model(&Account{}).Where("id = ?", t.ToAccountID).Take(&t.ToAccount).Error
+		if err != nil {
+			return &Transfer{}, err
+		}
+
+		err = db.Debug().Model(&User{}).Where("id = ?", t.ToAccount.OwnerID).Take(&t.ToAccount.Owner).Error
+		if err != nil {
+			return &Transfer{}, err
+		}
 	}
 	return t, nil
 }
@@ -171,6 +201,7 @@ func (t *Transfer) Delete(db *gorm.DB, tid uint64, aid uint32) (int64, error) {
 		}
 		return 0, db.Error
 	}
+	
 	return db.RowsAffected, nil
 }
 
