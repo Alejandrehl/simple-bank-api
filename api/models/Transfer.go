@@ -74,7 +74,17 @@ func (t *Transfer) FindAll(db *gorm.DB) (*[]Transfer, error) {
 				return &[]Transfer{}, err
 			}
 
+			err = db.Debug().Model(&User{}).Where("id = ?", transfers[i].FromAccount.OwnerID).Take(&transfers[i].FromAccount.Owner).Error
+			if err != nil {
+				return &[]Transfer{}, err
+			}
+
 			err = db.Debug().Model(&Account{}).Where("id = ?", transfers[i].ToAccountID).Take(&transfers[i].ToAccount).Error
+			if err != nil {
+				return &[]Transfer{}, err
+			}
+
+			err = db.Debug().Model(&User{}).Where("id = ?", transfers[i].ToAccount.OwnerID).Take(&transfers[i].ToAccount.Owner).Error
 			if err != nil {
 				return &[]Transfer{}, err
 			}
