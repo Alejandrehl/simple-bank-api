@@ -2,6 +2,7 @@ package models
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/jinzhu/gorm"
@@ -111,6 +112,28 @@ func (t *Transfer) FindAll(db *gorm.DB) (*[]Transfer, error) {
 
 func (t *Transfer) FindByOwnerId(db *gorm.DB, uid uint32) (*[]Transfer, error) {
 	var err error
+	/*
+	SELECT * 
+	FROM transfers AS t
+	JOIN accounts AS faccount ON t.from_account_id=faccount.id
+	JOIN accounts AS taccount ON t.from_account_id=taccount.id
+	WHERE faccount.owner_id = uid AND taccount.owner_id = uid
+	*/
+	type Result struct {
+		ID   int
+		Amount string
+	  }
+	  
+	var result Result
+	db.Raw(`
+	SELECT * 
+	FROM transfers AS t 
+	JOIN accounts AS faccount ON t.from_account_id=faccount.id
+	JOIN accounts AS taccount ON t.from_account_id=taccount.id
+	WHERE faccount.owner_id=? OR taccount.owner_id=?`, uid, uid).Scan(&result)
+
+	fmt.Println("AQUI8")
+	fmt.Println(result)
 
 	transfers := []Transfer{}
 	err = db.Debug().Model(&Transfer{}).Limit(100).Find(&transfers).Error
@@ -124,20 +147,20 @@ func (t *Transfer) FindByOwnerId(db *gorm.DB, uid uint32) (*[]Transfer, error) {
 				return &[]Transfer{}, err
 			}
 
-			err = db.Debug().Model(&User{}).Where("id = ?", transfers[i].FromAccount.OwnerID).Take(&transfers[i].FromAccount.Owner).Error
-			if err != nil {
-				return &[]Transfer{}, err
-			}
+			// err = db.Debug().Model(&User{}).Where("id = ?", transfers[i].FromAccount.OwnerID).Take(&transfers[i].FromAccount.Owner).Error
+			// if err != nil {
+			// 	return &[]Transfer{}, err
+			// }
 
-			err = db.Debug().Model(&Account{}).Where("id = ?", transfers[i].ToAccountID).Take(&transfers[i].ToAccount).Error
-			if err != nil {
-				return &[]Transfer{}, err
-			}
+			// err = db.Debug().Model(&Account{}).Where("id = ?", transfers[i].ToAccountID).Take(&transfers[i].ToAccount).Error
+			// if err != nil {
+			// 	return &[]Transfer{}, err
+			// }
 
-			err = db.Debug().Model(&User{}).Where("id = ?", transfers[i].ToAccount.OwnerID).Take(&transfers[i].ToAccount.Owner).Error
-			if err != nil {
-				return &[]Transfer{}, err
-			}
+			// err = db.Debug().Model(&User{}).Where("id = ?", transfers[i].ToAccount.OwnerID).Take(&transfers[i].ToAccount.Owner).Error
+			// if err != nil {
+			// 	return &[]Transfer{}, err
+			// }
 		}
 	}
 
