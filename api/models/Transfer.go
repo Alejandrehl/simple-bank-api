@@ -123,6 +123,21 @@ func (t *Transfer) FindByOwnerId(db *gorm.DB, uid uint32) (*[]Transfer, error) {
 			if err != nil {
 				return &[]Transfer{}, err
 			}
+
+			err = db.Debug().Model(&User{}).Where("id = ?", transfers[i].FromAccount.OwnerID).Take(&transfers[i].FromAccount.Owner).Error
+			if err != nil {
+				return &[]Transfer{}, err
+			}
+
+			err = db.Debug().Model(&Account{}).Where("id = ?", transfers[i].ToAccountID).Take(&transfers[i].ToAccount).Error
+			if err != nil {
+				return &[]Transfer{}, err
+			}
+
+			err = db.Debug().Model(&User{}).Where("id = ?", transfers[i].ToAccount.OwnerID).Take(&transfers[i].ToAccount.Owner).Error
+			if err != nil {
+				return &[]Transfer{}, err
+			}
 		}
 	}
 
@@ -131,6 +146,7 @@ func (t *Transfer) FindByOwnerId(db *gorm.DB, uid uint32) (*[]Transfer, error) {
 
 func (t *Transfer) FindByID(db *gorm.DB, pid uint64) (*Transfer, error) {
 	var err error
+
 	err = db.Debug().Model(&Transfer{}).Where("id = ?", pid).Take(&t).Error
 	if err != nil {
 		return &Transfer{}, err
@@ -156,11 +172,11 @@ func (t *Transfer) FindByID(db *gorm.DB, pid uint64) (*Transfer, error) {
 			return &Transfer{}, err
 		}
 	}
+
 	return t, nil
 }
 
 func (t *Transfer) Update(db *gorm.DB) (*Transfer, error) {
-
 	var err error
 
 	err = db.Debug().Model(&Transfer{}).Where("id = ?", t.ID).Updates(Transfer{Amount: t.Amount, UpdatedAt: time.Now()}).Error
@@ -192,7 +208,6 @@ func (t *Transfer) Update(db *gorm.DB) (*Transfer, error) {
 }
 
 func (t *Transfer) Delete(db *gorm.DB, tid uint64, aid uint32) (int64, error) {
-
 	db = db.Debug().Model(&Transfer{}).Where("id = ? and from_account_id = ?", tid, aid).Take(&Transfer{}).Delete(&Transfer{})
 
 	if db.Error != nil {
@@ -201,7 +216,7 @@ func (t *Transfer) Delete(db *gorm.DB, tid uint64, aid uint32) (int64, error) {
 		}
 		return 0, db.Error
 	}
-	
+
 	return db.RowsAffected, nil
 }
 
