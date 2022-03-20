@@ -17,7 +17,7 @@ import (
 
 func (server *Server) CreateTransfer(w http.ResponseWriter, r *http.Request) {
 	// Verifiy authentication
-	_, err := auth.ExtractTokenID(r)
+	uid, err := auth.ExtractTokenID(r)
 	if err != nil {
 		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
 		return
@@ -48,10 +48,15 @@ func (server *Server) CreateTransfer(w http.ResponseWriter, r *http.Request) {
 
 	// Check if from_account exists
 	from_account := models.Account{}
-	fmt.Println("FromAccount")
-	fmt.Println(from_account)
 	_, err = from_account.CheckAccountExist(server.DB, uint64(transfer.FromAccountID))
 	if err != nil {
+		responses.ERROR(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	// Check if from_account.OwnerId is equal uid
+	if (from_account.OwnerID != uid) {
+		var err = errors.New("from_account does not belong to authenticated user")
 		responses.ERROR(w, http.StatusInternalServerError, err)
 		return
 	}
@@ -65,8 +70,6 @@ func (server *Server) CreateTransfer(w http.ResponseWriter, r *http.Request) {
 
 	// Check if to_account exists
 	to_account := models.Account{} 
-	fmt.Println("ToAccount")
-	fmt.Println(to_account)
 	_, err = to_account.CheckAccountExist(server.DB, uint64(transfer.ToAccountID))
 	if err != nil {
 		responses.ERROR(w, http.StatusInternalServerError, err)
@@ -86,7 +89,6 @@ func (server *Server) CreateTransfer(w http.ResponseWriter, r *http.Request) {
 	_, err = to_account.Update(server.DB)
 	if err != nil {
 		// TODO: Devolver el dinero a from_account
-
 		responses.ERROR(w, http.StatusInternalServerError, err)
 		return
 	}
@@ -95,7 +97,6 @@ func (server *Server) CreateTransfer(w http.ResponseWriter, r *http.Request) {
 	transferCreated, err := transfer.Save(server.DB)
 	if err != nil {
 		// TODO: Devolver el dinero a from_account y descontarla de to_account
-	
 		formattedError := formaterror.FormatError(err.Error())
 		responses.ERROR(w, http.StatusInternalServerError, formattedError)
 		return

@@ -41,11 +41,11 @@ func (t *Transfer) Validate() error {
 	}
 
 	if (t.FromAccountID == 0) {
-		return errors.New("destiny account is invalid")
+		return errors.New("from account is invalid")
 	}
 
 	if (t.ToAccountID == 0) {
-		return errors.New("destiny account is invalid")
+		return errors.New("to account is invalid")
 	}
 
 	return nil
