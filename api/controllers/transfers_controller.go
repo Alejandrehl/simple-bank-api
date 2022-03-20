@@ -76,6 +76,13 @@ func (server *Server) CreateTransfer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Check if from_account and to_account are not the same account
+	if (from_account.ID == to_account.ID) {
+		var err = errors.New("you cannot transfer money to the same account")
+		responses.ERROR(w, http.StatusInternalServerError, err)
+		return
+	}
+
 	// Update from_account balance Account.Balance - Transfer.Amount
 	from_account.Balance = from_account.Balance - transfer.Amount
 	_, err = from_account.Update(server.DB)
