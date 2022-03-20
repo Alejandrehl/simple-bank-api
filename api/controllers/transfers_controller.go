@@ -16,18 +16,21 @@ import (
 )
 
 func (server *Server) CreateTransfer(w http.ResponseWriter, r *http.Request) {
+	// Verifiy authentication
 	_, err := auth.ExtractTokenID(r)
 	if err != nil {
 		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
 		return
 	}
 
+	// Get data from body
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 
+	// Create transference with data from body
 	transfer := models.Transfer{}
 	err = json.Unmarshal(body, &transfer)
 	if err != nil {
@@ -35,6 +38,7 @@ func (server *Server) CreateTransfer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Prepare and validate transfer data
 	transfer.Prepare()
 	err = transfer.Validate()
 	if err != nil {
@@ -42,32 +46,52 @@ func (server *Server) CreateTransfer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var account models.Account
-
+	// Check if from_account exists
 	from_account := models.Account{}
+	fmt.Println("FromAccount")
+	fmt.Println(from_account)
 	_, err = from_account.CheckAccountExist(server.DB, uint64(transfer.FromAccountID))
 	if err != nil {
 		responses.ERROR(w, http.StatusInternalServerError, err)
 		return
 	}
 
-	to_account := models.Account{} 
-	_, err = account.CheckAccountExist(server.DB, uint64(transfer.ToAccountID))
-	if err != nil {
-		responses.ERROR(w, http.StatusInternalServerError, err)
-		return
-	}
-
-	if (from_account.Balance <= transfer.Amount) {
+	// Check from_account balance
+	if (from_account.Balance < transfer.Amount) {
 		var err = errors.New("insufficient balance to make this transfer")
 		responses.ERROR(w, http.StatusInternalServerError, err)
 		return
 	}
 
-	// TODO: Descontar monto de transferencia de from_account y sumarla a to_account
-	from_account.Balance = from_account.Balance - transfer.Amount
-	to_account.Balance = to_account.Balance + transfer.Amount
+	// Check if to_account exists
+	to_account := models.Account{} 
+	fmt.Println("ToAccount")
+	fmt.Println(to_account)
+	_, err = to_account.CheckAccountExist(server.DB, uint64(transfer.ToAccountID))
+	if err != nil {
+		responses.ERROR(w, http.StatusInternalServerError, err)
+		return
+	}
 
+	// Update from_account balance Account.Balance - Transfer.Amount
+	from_account.Balance = from_account.Balance - transfer.Amount
+	_, err = from_account.Update(server.DB)
+	if err != nil {
+		responses.ERROR(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	// Update from_account balance Account.Balance - Transfer.Amount
+	to_account.Balance = to_account.Balance + transfer.Amount
+	_, err = to_account.Update(server.DB)
+	if err != nil {
+		// TODO: Devolver el dinero a from_account
+
+		responses.ERROR(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	// Crear registro de nueva transferencia
 	transferCreated, err := transfer.Save(server.DB)
 	if err != nil {
 		// TODO: Devolver el dinero a from_account y descontarla de to_account
