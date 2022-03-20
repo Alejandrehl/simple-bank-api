@@ -16,6 +16,12 @@ import (
 )
 
 func (server *Server) CreateAccount(w http.ResponseWriter, r *http.Request) {
+	uid, err := auth.ExtractTokenID(r)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
+		return
+	}
+
 	body, err := ioutil.ReadAll(r.Body)
 
 	if err != nil {
@@ -24,7 +30,6 @@ func (server *Server) CreateAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	account := models.Account{}
-
 	err = json.Unmarshal(body, &account)
 	if err != nil {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
@@ -35,12 +40,6 @@ func (server *Server) CreateAccount(w http.ResponseWriter, r *http.Request) {
 	err = account.Validate()
 	if err != nil {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
-		return
-	}
-
-	uid, err := auth.ExtractTokenID(r)
-	if err != nil {
-		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
 		return
 	}
 
@@ -64,7 +63,6 @@ func (server *Server) GetAllAccounts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	account := models.Account{}
-
 	accounts, err := account.FindAll(server.DB, uid)
 	if err != nil {
 		responses.ERROR(w, http.StatusInternalServerError, err)
@@ -89,7 +87,6 @@ func (server *Server) GetAccountById(w http.ResponseWriter, r *http.Request) {
 	}
 
 	account := models.Account{}
-
 	accountReceived, err := account.FindByID(server.DB, aid)
 	if err != nil {
 		responses.ERROR(w, http.StatusInternalServerError, err)
@@ -156,21 +153,20 @@ func (server *Server) UpdateAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	accountUpdate.ID = account.ID //this is important to tell the model the item id to update, the other update field are set above
-
 	accountUpdated, err := accountUpdate.Update(server.DB)
 	if err != nil {
 		formattedError := formaterror.FormatError(err.Error())
 		responses.ERROR(w, http.StatusInternalServerError, formattedError)
 		return
 	}
+
 	responses.JSON(w, http.StatusOK, accountUpdated)
 }
 
 func (server *Server) DeleteAccount(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
-	// Is a valid item id given to us?
-	rid, err := strconv.ParseUint(vars["id"], 10, 64)
+	aid, err := strconv.ParseUint(vars["id"], 10, 64)
 	if err != nil {
 		responses.ERROR(w, http.StatusBadRequest, err)
 		return
@@ -183,24 +179,33 @@ func (server *Server) DeleteAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Check if the post exist
-	item := models.Account{}
-	err = server.DB.Debug().Model(models.Account{}).Where("id = ?", rid).Take(&item).Error
+	// Check if the account exist
+	account := models.Account{}
+	err = server.DB.Debug().Model(models.Account{}).Where("id = ?", aid).Take(&account).Error
 	if err != nil {
 		responses.ERROR(w, http.StatusNotFound, errors.New("Unauthorized"))
 		return
 	}
 
-	// Is the authenticated user, the owner of this post?
-	if uid != item.OwnerID {
+	// Is the authenticated user, the owner of this account?
+	if uid != account.OwnerID {
 		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
 		return
 	}
-	_, err = item.Delete(server.DB, rid, uid)
+
+	// Check if the account balance is more than zero
+	if account.Balance > 0 {
+		err = errors.New("you cannot delete an account with a balance greater than $0")
+		responses.ERROR(w, http.StatusUnauthorized, err)
+		return
+	}
+
+	_, err = account.Delete(server.DB, aid, uid)
 	if err != nil {
 		responses.ERROR(w, http.StatusBadRequest, err)
 		return
 	}
-	w.Header().Set("Entity", fmt.Sprintf("%d", rid))
+
+	w.Header().Set("Entity", fmt.Sprintf("%d", aid))
 	responses.JSON(w, http.StatusNoContent, "")
 }
