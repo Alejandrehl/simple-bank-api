@@ -18,12 +18,15 @@ type User struct {
 	Name  string    `gorm:"size:255;not null;" json:"name"`
 	LastName  string    `gorm:"size:255;not null;" json:"last_name"`
 	Email     string    `gorm:"size:100;not null;unique" json:"email"`
+	EmailVerified bool `gorm:"default:false" json:"email_verified"`
+	Phone     string    `gorm:"size:20;unique" json:"phone"`
+	PhoneVerified bool `gorm:"default:false" json:"phone_verified"`
 	Password  string    `gorm:"size:100;not null;" json:"password"`
 	CreatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
 	UpdatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
 }
 
-var selectUserFields = []string{"id", "nickname", "name", "last_name", "email", "created_at", "updated_at"}
+var selectUserFields = []string{"id", "nickname", "name", "last_name", "email", "email_verified", "phone", "phone_verified", "created_at", "updated_at"}
 
 func Hash(password string) ([]byte, error) {
 	return bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
