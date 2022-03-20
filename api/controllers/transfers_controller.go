@@ -91,7 +91,7 @@ func (server *Server) CreateTransfer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Crear registro de nueva transferencia
+	// Create new transfer record
 	transferCreated, err := transfer.Save(server.DB)
 	if err != nil {
 		// TODO: Devolver el dinero a from_account y descontarla de to_account
