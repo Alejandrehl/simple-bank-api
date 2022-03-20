@@ -50,10 +50,12 @@ func (server *Server) CreateTransfer(w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusInternalServerError, err)
 		return
 	}
-	// TODO: Verificar si el saldo(balance) de from_account es mayor que el monto a 
+
 	fmt.Println(from_account)
 	fmt.Println(from_account.ID)
 	fmt.Println(from_account.Balance)
+
+	// TODO: Verificar si el saldo(balance) de from_account es mayor que el monto a 
 
 	account = models.Account{}
 	_, err = account.CheckAccountExist(server.DB, uint64(transfer.ToAccountID))
