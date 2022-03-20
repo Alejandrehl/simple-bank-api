@@ -30,7 +30,7 @@ func (server *Server) CreateTransfer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Create transference with data from body
+	// Create transfer with data from body
 	transfer := models.Transfer{}
 	err = json.Unmarshal(body, &transfer)
 	if err != nil {
@@ -83,7 +83,7 @@ func (server *Server) CreateTransfer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Update from_account balance Account.Balance - Transfer.Amount
+	// Update from_account balance from_account.Balance - transfer.Amount
 	from_account.Balance = from_account.Balance - transfer.Amount
 	_, err = from_account.Update(server.DB)
 	if err != nil {
@@ -91,11 +91,14 @@ func (server *Server) CreateTransfer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Update from_account balance Account.Balance - Transfer.Amount
+	// Update to_account balance to_account.Balance + transfer.Amount
 	to_account.Balance = to_account.Balance + transfer.Amount
 	_, err = to_account.Update(server.DB)
 	if err != nil {
-		// TODO: Devolver el dinero a from_account
+		// Return money to the from_account
+		from_account.Balance = from_account.Balance + transfer.Amount
+		from_account.Update(server.DB)
+
 		responses.ERROR(w, http.StatusInternalServerError, err)
 		return
 	}
@@ -103,7 +106,14 @@ func (server *Server) CreateTransfer(w http.ResponseWriter, r *http.Request) {
 	// Create new transfer record
 	transferCreated, err := transfer.Save(server.DB)
 	if err != nil {
-		// TODO: Devolver el dinero a from_account y descontarla de to_account
+		// Return money to the from_account
+		from_account.Balance = from_account.Balance + transfer.Amount
+		from_account.Update(server.DB)
+
+		// Discount money from to_account
+		to_account.Balance = to_account.Balance - transfer.Amount
+		to_account.Update(server.DB)
+
 		formattedError := formaterror.FormatError(err.Error())
 		responses.ERROR(w, http.StatusInternalServerError, formattedError)
 		return
