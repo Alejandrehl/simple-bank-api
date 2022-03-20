@@ -44,27 +44,29 @@ func (server *Server) CreateTransfer(w http.ResponseWriter, r *http.Request) {
 
 	var account models.Account
 
-	account = models.Account{}
-	from_account, err := account.CheckAccountExist(server.DB, uint64(transfer.FromAccountID))
+	from_account := models.Account{}
+	_, err = from_account.CheckAccountExist(server.DB, uint64(transfer.FromAccountID))
 	if err != nil {
 		responses.ERROR(w, http.StatusInternalServerError, err)
 		return
 	}
 
-	fmt.Println(from_account)
-	fmt.Println(from_account.ID)
-	fmt.Println(from_account.Balance)
-
-	// TODO: Verificar si el saldo(balance) de from_account es mayor que el monto a 
-
-	account = models.Account{}
+	to_account := models.Account{} 
 	_, err = account.CheckAccountExist(server.DB, uint64(transfer.ToAccountID))
 	if err != nil {
 		responses.ERROR(w, http.StatusInternalServerError, err)
 		return
 	}
 
+	if (from_account.Balance <= transfer.Amount) {
+		var err = errors.New("insufficient balance to make this transfer")
+		responses.ERROR(w, http.StatusInternalServerError, err)
+		return
+	}
+
 	// TODO: Descontar monto de transferencia de from_account y sumarla a to_account
+	from_account.Balance = from_account.Balance - transfer.Amount
+	to_account.Balance = to_account.Balance + transfer.Amount
 
 	transferCreated, err := transfer.Save(server.DB)
 	if err != nil {
